@@ -11,7 +11,8 @@ import SwiftUI
 struct SwiftUIChartsApp: App {
     var body: some Scene {
         WindowGroup {
-			BarChartView(title:	"Annual Sales",	barColor: .blue, data: ChartData.sampleData)
+			BarChartView(title:	"Annual Sales", legend: "\(ChartData.sampleData.first!.label) - \(ChartData.sampleData.last!.label)",	barColor: .blue, data: ChartData.sampleData)
+//				.frame(width:	250,	height:	350)
         }
     }
 }

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BarChartView:	View	{
 	var title:	String
+	var legend:	String
 	var barColor: Color
 	var data: [ChartData]
 	
@@ -26,14 +27,13 @@ struct BarChartView:	View	{
 			Text("\(currentValue)")
 				.font(.headline)
 			
-			
 			GeometryReader { geometry in
 				VStack {
 					HStack	{
 						ForEach(0..<data.count, id: \.self) { i in
 							BarChartCell(value: normalizedValue(index: i), barColor: barColor)
 								.opacity(barIsTouched(index:	i)	?	1	:	0.7)
-								.scaleEffect(barIsTouched(index:	i) ? CGSize(width: 1.05, height: 1) : CGSize(width: 1, height: 1), anchor: .bottom)
+								.scaleEffect(barIsTouched(index:	i) ? CGSize(width: 1.1, height: 1) : CGSize(width: 1, height: 1), anchor: .bottom)
 								.animation(.spring())
 								.padding(.top)
 						}
@@ -54,21 +54,24 @@ struct BarChartView:	View	{
 								})
 					)
 					
-					Text(currentLabel)
-						.bold()
-						.padding(5)
-						.background(labelBackground)
-						.offset(x:	labelOffset(in: geometry.frame(in: .local).width))
-						.animation(.easeIn)
+					if currentLabel.isEmpty {
+						Text(legend)
+							.bold()
+							.foregroundColor(.black)
+							.padding(5)
+							.background(RoundedRectangle(cornerRadius: 5).foregroundColor(.white).shadow(radius: 3))
+					}	else	{
+						Text(currentLabel)
+							.bold()
+							.foregroundColor(.black)
+							.padding(5)
+							.background(RoundedRectangle(cornerRadius: 5).foregroundColor(.white).shadow(radius: 3))
+							.offset(x:	labelOffset(in: geometry.frame(in: .local).width))
+							.animation(.easeIn)
+					}
 				}
 			}
 		}.padding()
-	}
-	
-	@ViewBuilder	var labelBackground:	some	View	{
-		if !currentLabel.isEmpty	{
-			RoundedRectangle(cornerRadius: 5).foregroundColor(.white).shadow(radius: 3)
-		}
 	}
 	
 	func barIsTouched(index:	Int)	->	Bool	{
@@ -95,14 +98,19 @@ struct BarChartView:	View	{
 	}
 	
 	func updateCurrentValue()	{
-		let index	=	Int(touchLocation	*	CGFloat(data.count))
-		guard index	<	data.count	&&	index	>=	0	else	{
+		let currentIndex	=	Int(touchLocation	*	CGFloat(data.count))
+		guard currentIndex	<	data.count	&&	currentIndex	>=	0	else	{
 			currentValue	=	""
 			currentLabel	=	""
 			return
 		}
-		currentValue	=	"\(data[index].value)"
-		currentLabel	=	data[index].label
+		
+		if currentValue	!=	"\(data[currentIndex].value)"	{
+			currentValue	=	"\(data[currentIndex].value)"
+			currentLabel	=	data[currentIndex].label
+			HapticFeedback.playSelection()
+		}
+		
 	}
 	
 	func resetValues() {
@@ -119,12 +127,13 @@ struct BarChartView:	View	{
 		let cellWidth	=	width	/	CGFloat(data.count)
 		let actualWidth	=	width	-	cellWidth
 		let position	=	cellWidth	*	CGFloat(currentIndex)	-	actualWidth/2
+		
 		return position
 	}
 }
 
 struct BarChartView_Previews: PreviewProvider {
     static var previews: some View {
-		BarChartView(title:	"Chart Title",	barColor: .blue, data: ChartData.sampleData)
+		BarChartView(title:	"Chart Title", legend: "Legend",	barColor: .blue, data: ChartData.sampleData)
     }
 }
