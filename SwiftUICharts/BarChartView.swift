@@ -46,8 +46,8 @@ struct BarChartView:	View	{
 									updateCurrentValue()
 								})
 								.onEnded({ _ in
-									DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-										withAnimation(Animation.easeOut(duration: 0.5)) {
+									DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                        withAnimation(Animation.easeOut(duration: 0.5)) {
 											resetValues()
 										}
 									}
@@ -117,6 +117,7 @@ struct BarChartView:	View	{
 		touchLocation = -1
 		currentValue	=	""
 		currentLabel	=	""
+        HapticFeedback.playSelection()
 	}
 	
 	func labelOffset(in width:	CGFloat)	->	CGFloat	{

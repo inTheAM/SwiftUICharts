@@ -17,6 +17,7 @@
 		E2CDCABB263C9B8A00C658C2 /* BarChartCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2CDCABA263C9B8A00C658C2 /* BarChartCell.swift */; };
 		E2CDCABD263C9B8B00C658C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E2CDCABC263C9B8B00C658C2 /* Assets.xcassets */; };
 		E2CDCAC0263C9B8B00C658C2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E2CDCABF263C9B8B00C658C2 /* Preview Assets.xcassets */; };
+		E2FBABFF2655349900D29B91 /* PieChartFunctionality.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2FBABFE2655349900D29B91 /* PieChartFunctionality.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		E2CDCABC263C9B8B00C658C2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E2CDCABF263C9B8B00C658C2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E2CDCAC1263C9B8B00C658C2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E2FBABFE2655349900D29B91 /* PieChartFunctionality.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieChartFunctionality.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +82,7 @@
 				E27595DD26442BC200B8D65B /* PieChartCell.swift */,
 				E2275C3E2644341100E8B91D /* PieChartView.swift */,
 				E297A2ED2645139000207DDC /* ChartData.swift */,
+				E2FBABFD2655347700D29B91 /* Functionality */,
 				E2CDCABC263C9B8B00C658C2 /* Assets.xcassets */,
 				E2CDCAC1263C9B8B00C658C2 /* Info.plist */,
 				E2CDCABE263C9B8B00C658C2 /* Preview Content */,
@@ -93,6 +96,14 @@
 				E2CDCABF263C9B8B00C658C2 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		E2FBABFD2655347700D29B91 /* Functionality */ = {
+			isa = PBXGroup;
+			children = (
+				E2FBABFE2655349900D29B91 /* PieChartFunctionality.swift */,
+			);
+			path = Functionality;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -168,6 +179,7 @@
 				E2CDCABB263C9B8A00C658C2 /* BarChartCell.swift in Sources */,
 				E27595DE26442BC200B8D65B /* PieChartCell.swift in Sources */,
 				E27595E026442BEC00B8D65B /* CGRect.swift in Sources */,
+				E2FBABFF2655349900D29B91 /* PieChartFunctionality.swift in Sources */,
 				E297A2EE2645139000207DDC /* ChartData.swift in Sources */,
 				E297A2F0264519B300207DDC /* Color.swift in Sources */,
 				E2CDCAB9263C9B8A00C658C2 /* SwiftUIChartsApp.swift in Sources */,

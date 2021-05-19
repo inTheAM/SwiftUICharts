@@ -9,7 +9,7 @@ import SwiftUI
 
 extension Color	{
 	static var random:	Color	{
-		let colors	=	[Color.blue,	.purple,	.green,	.gray,	.orange,	.red]
+		let colors	=	[Color.blue,	.purple,	.green,	.orange,	.red]
 		return colors.randomElement()!
 	}
 }

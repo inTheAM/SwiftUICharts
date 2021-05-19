@@ -8,121 +8,159 @@
 import SwiftUI
 
 struct PieChartView: View {
+    var title:    String
+    var legend:    String
 	var data: [ChartData]
 	var backgroundColor: Color
 	var accentColor: Color
 	
-	@State	private var showValue	=	false
 	@State	private var currentValue	=	""
+    @State private var currentLabel    =    ""
+    @State private var touchLocation:   CGPoint =   .init(x:    -1,  y:  -1)
 	
-	@State private var currentTouchedIndex = -1 {
-		didSet {
-			if oldValue != currentTouchedIndex {
-				showValue = currentTouchedIndex != -1
-				currentValue = showValue ? "\(data[currentTouchedIndex].value)" : "0"
-			}
-		}
+	var body: some View {
+        VStack {
+            Text(title)
+                .bold()
+                .font(.largeTitle)
+            
+            
+            GeometryReader { geometry in
+                ZStack  {
+                    ForEach(0..<self.data.count){ i in
+                        PieChartCell(center: geometry.frame(in: .local).mid,
+                                     radius:    geometry.frame(in: .local).width/2,
+                                     startDeg: pieSlices()[i].startDegree,
+                                     endDeg: pieSlices()[i].endDegree,
+                                     isTouched: sliceIsTouched(index: i, inPie: geometry.frame(in:  .local)),
+                                     accentColor: .random
+                        )
+                    }
+                }
+                .gesture(DragGesture(minimumDistance: 0)
+                            .onChanged({ position in
+                                let pieSize = geometry.frame(in: .local)
+                                
+                                touchLocation   =   position.location
+                                updateValue(inPie: pieSize)
+                                
+                            })
+                            .onEnded({ value in
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                    withAnimation(Animation.easeOut) {
+                                        resetValues()
+                                    }
+                                    HapticFeedback.playSelection()
+                                }
+                            }))
+            }.aspectRatio(contentMode: .fit)
+            
+            VStack  {
+                if !currentLabel.isEmpty   {
+                    Text(currentLabel)
+                        .bold()
+                        .foregroundColor(.black)
+                        .padding(10)
+                        .background(RoundedRectangle(cornerRadius: 5).foregroundColor(.white).shadow(radius: 3))
+                }   else if !legend.isEmpty {
+                        Text(legend)
+                            .bold()
+                            .foregroundColor(.black)
+                            .padding(10)
+                            .background(RoundedRectangle(cornerRadius: 5).foregroundColor(.white).shadow(radius: 3))
+                }
+                
+                if !currentValue.isEmpty {
+                    Text("\(currentValue)")
+                        .bold()
+                        .foregroundColor(.black)
+                        .padding(5)
+                        .background(RoundedRectangle(cornerRadius: 5).foregroundColor(.white).shadow(radius: 3))
+                }
+
+
+            }.padding()
+            
+        }.padding()
 	}
-	
-	public var body: some View {
-		GeometryReader { geometry in
-			ZStack{
-				ForEach(0..<self.data.count){ i in
-					PieChartCell(rect: geometry.frame(in: .local), startDeg: pieSlices()[i].0, endDeg: pieSlices()[i].1, index: i, accentColor: .random)
-						.scaleEffect(self.currentTouchedIndex == i ? 1.1 : 1)
-						.animation(Animation.spring())
-				}
-			}
-			.gesture(DragGesture(minimumDistance: 0)
-						.onChanged({ value in
-							let rect = geometry.frame(in: .local)
-							let isTouchInPie = isPointInCircle(point: value.location, circleRect: rect)
-							if isTouchInPie {
-								let touchDegree = degree(for: value.location, inCircleRect: rect)
-								self.currentTouchedIndex = pieSlices().firstIndex(where: { $0.0 < touchDegree && $0.1 > touchDegree }) ?? -1
-							} else {
-								self.currentTouchedIndex = -1
-							}
-						})
-						.onEnded({ value in
-							self.currentTouchedIndex = -1
-						}))
-		}
-	}
+    
+    
+    func sliceIsTouched(index:  Int,    inPie   pieSize:    CGRect)    ->  Bool    {
+        guard let angle =   angleAtTouchLocation(inPie: pieSize)    else    {return false}
+        return pieSlices().firstIndex(where: { $0.startDegree < angle && $0.endDegree > angle })    ==  index
+    }
+    
+    
+    func updateValue(inPie   pieSize:    CGRect)  {
+        guard let angle =   angleAtTouchLocation(inPie: pieSize)    else    {return}
+        let currentIndex = pieSlices().firstIndex(where: { $0.startDegree < angle && $0.endDegree > angle }) ?? -1
+        
+        currentLabel    =   data[currentIndex].label
+        currentValue    =   "\(data[currentIndex].value)"
+    }
+    
+    func angleAtTouchLocation(inPie pieSize:    CGRect) ->  Double?  {
+        let dx = touchLocation.x - pieSize.midX
+        let dy = touchLocation.y - pieSize.midY
+        
+        let distanceToCenter = (dx * dx + dy * dy).squareRoot()
+        let radius  =   pieSize.width/2
+        guard distanceToCenter  <=  radius  else    {
+            return nil
+        }
+        
+        var angle:  Double {
+            let angleAtTouchLocation    =   Double(atan2(dy, dx) *   (180  /   .pi))
+            
+            if angleAtTouchLocation <   0   {
+                return (180  -   abs(angleAtTouchLocation))  + 180
+            }   else    {
+                return angleAtTouchLocation
+            }
+        }
+        return angle
+    }
+    
+    
+    func resetValues() {
+        currentValue    =   ""
+        currentLabel    =   ""
+        touchLocation   =   .init(x:    -1,  y:  -1)
+    }
 	
 	func normalizedValue(index:	Int)	->	Double	{
-		var total:	Double	{
-			var total	=	0.0
-			for data in data	{
-				total	+=	data.value
-			}
-			return total
-		}
-		
-		return data[index].value/total
+        var total   =    0.0
+        data.forEach    {   data in
+            total    +=    data.value
+        }
+        return data[index].value/total
 	}
 	
-	func pieSlices()	->	[(Double,	Double)]	{
-		var total:	Double	{
-			var total	=	0.0
-			for data in data	{
-				total	+=	data.value
-			}
-			return total
-		}
-		
-		var slices:	[(Double,	Double)]	{
-			
-			var slices	=	[(Double,	Double)]()
-			for data in data.enumerated()	{
-				let value	=	normalizedValue(index: data.0)
-				if slices.isEmpty	{
-					slices.append((0,	value*360))
-				}	else	{
-					slices.append((slices.last!.1,	(value*360	+	slices.last!.1)))
-				}
-			}
-			return slices
-		}
+	func pieSlices()	->	[PieSlice]	{
+		var slices  =	[PieSlice]()
+        data.enumerated().forEach 	{  (index,  data) in
+            let value	=	normalizedValue(index: index)
+            if slices.isEmpty	{
+                slices.append((.init(startDegree: 0, endDegree: value   *   360)))
+            }	else	{
+                slices.append(.init(startDegree:    slices.last!.endDegree,	endDegree: (value  *   360	+	slices.last!.endDegree)))
+            }
+        }
 		return slices
-	}
-	
-	func isPointInCircle(point: CGPoint, circleRect: CGRect) -> Bool {
-		let r = min(circleRect.width, circleRect.height) / 2
-		let center = CGPoint(x: circleRect.midX, y: circleRect.midY)
-		let dx = point.x - center.x
-		let dy = point.y - center.y
-		let distance = sqrt(dx * dx + dy * dy)
-		return distance <= r
-	}
-	
-	func degree(for point: CGPoint, inCircleRect circleRect: CGRect) -> Double {
-		let center = CGPoint(x: circleRect.midX, y: circleRect.midY)
-		let dx = point.x - center.x
-		let dy = point.y - center.y
-		let acuteDegree = Double(atan(dy / dx)) * (180 / .pi)
-		
-		let isInBottomRight = dx >= 0 && dy >= 0
-		let isInBottomLeft = dx <= 0 && dy >= 0
-		let isInTopLeft = dx <= 0 && dy <= 0
-		let isInTopRight = dx >= 0 && dy <= 0
-		
-		if isInBottomRight {
-			return acuteDegree
-		} else if isInBottomLeft {
-			return 180 - abs(acuteDegree)
-		} else if isInTopLeft {
-			return 180 + abs(acuteDegree)
-		} else if isInTopRight {
-			return 360 - abs(acuteDegree)
-		}
-		
-		return 0
 	}
 }
 
+extension PieChartView  {
+    struct PieSlice {
+        var startDegree:    Double
+        var endDegree:  Double
+    }
+}
+
+
+
 struct PieChartView_Previews: PreviewProvider {
     static var previews: some View {
-		PieChartView(data: ChartData.sampleData, backgroundColor: .black, accentColor: .green)
+        PieChartView(title: "Chart Title",  legend: "Legend", data: ChartData.sampleData, backgroundColor: .black, accentColor: .green)
     }
 }
